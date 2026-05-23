@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GC 3550 — Grupo de Crecimiento</title>
+  <meta name="description"
+    content="Sistema de gestión para el Grupo de Crecimiento en Buchardo 2010. Administra personas, eventos y organización del GC." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+
+  <!-- ===================== LOGIN ===================== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-bg-pattern"></div>
+    <div class="login-card" id="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">
+          <i class="fas fa-cross"></i>
+        </div>
+        <h1>GC Buchardo</h1>
+        <p class="login-subtitle">Grupo de Crecimiento</p>
+      </div>
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="login-email" placeholder="Correo electrónico" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="login-password" placeholder="Contraseña" required />
+        </div>
+        <button type="submit" class="btn-primary" id="login-btn">
+          <span>Ingresar</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+        <p id="login-error" class="login-error"></p>
+        <div class="login-toggle">
+          <span>¿No tenés cuenta?</span>
+          <a href="#" id="toggle-signup">Registrate</a>
+        </div>
+      </form>
+
+      <form id="signup-form" autocomplete="off" style="display:none;">
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="signup-email" placeholder="Correo electrónico" required />
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="signup-password" placeholder="Contraseña (mín. 6 caracteres)" required
+            minlength="6" />
+        </div>
+        <button type="submit" class="btn-primary" id="signup-btn">
+          <span>Crear cuenta</span>
+          <i class="fas fa-user-plus"></i>
+        </button>
+        <p id="signup-error" class="login-error"></p>
+        <div class="login-toggle">
+          <span>¿Ya tenés cuenta?</span>
+          <a href="#" id="toggle-login">Iniciá sesión</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div id="app" class="app" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon-sm">
+            <i class="fas fa-cross"></i>
+          </div>
+          <div>
+            <h2>GC Buchardo</h2>
+            <span class="sidebar-tagline">Grupo de Crecimiento</span>
+          </div>
+        </div>
+        <button class="sidebar-toggle-btn" id="sidebar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="personas" id="nav-personas">
+          <i class="fas fa-users"></i>
+          <span>Personas</span>
+        </a>
+        <a href="#" class="nav-item" data-section="calendario" id="nav-calendario">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Calendario</span>
+        </a>
+        <a href="#" class="nav-item" data-section="organizacion" id="nav-organizacion">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Organización GC</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info" id="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <span id="user-email-display">usuario@email.com</span>
+        </div>
+        <button class="btn-logout" id="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Salir</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile header -->
+    <header class="mobile-header" id="mobile-header">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h2>GC Buchardo</h2>
+      <button class="btn-logout-mobile" id="logout-btn-mobile">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+
+      <!-- ============ PERSONAS ============ -->
+      <section id="section-personas" class="section active">
+        <div class="section-header">
+          <div>
+            <h1><i class="fas fa-users"></i> Personas</h1>
+            <p class="section-desc">Registro de asistentes al Grupo de Crecimiento</p>
+          </div>
+          <button class="btn-primary" id="add-persona-btn">
+            <i class="fas fa-plus"></i>
+            <span>Nueva Persona</span>
+          </button>
+        </div>
+
+        <!-- Search and filter bar -->
+        <div class="toolbar">
+          <div class="search-box" id="search-personas-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-personas" placeholder="Buscar persona..." />
+          </div>
+          <div class="filter-group">
+            <select id="filter-categoria">
+              <option value="">Todas las categorías</option>
+              <option value="Jóvenes">Jóvenes</option>
+              <option value="Mujeres">Mujeres</option>
+              <option value="Adultos">Adultos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="stats-row" id="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div>
+              <span class="stat-value" id="stat-total">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon star"><i class="fas fa-star"></i></div>
+            <div>
+              <span class="stat-value" id="stat-primera-vez">0</span>
+              <span class="stat-label">Primera vez</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon check"><i class="fas fa-heart"></i></div>
+            <div>
+              <span class="stat-value" id="stat-contenidas">0</span>
+              <span class="stat-label">Contenidas</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon water"><i class="fas fa-water"></i></div>
+            <div>
+              <span class="stat-value" id="stat-bautizadas">0</span>
+              <span class="stat-label">Bautizadas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+          <table class="data-table" id="personas-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Categoría</th>
+                <th>1ra Vez</th>
+                <th>Veces</th>
+                <th>Contenida</th>
+                <th>Primera Visita</th>
+                <th>Cumpleaños</th>
+                <th>Encuentro</th>
+                <th>Bautismo</th>
+                <th>Discipulado</th>
+                <th>Esc. Líderes</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="personas-tbody">
+            </tbody>
+          </table>
+          <div class="empty-state" id="personas-empty" style="display:none;">
+            <i class="fas fa-user-friends"></i>
+            <h3>No hay personas registradas</h3>
+            <p>Agregá la primera persona al grupo de crecimiento</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CALENDARIO ============ -->
+      <section id="section-calendario" class="section" style="display:none;">
+        <div class="section-header">
+          <div>
+            <h1><i class="fas fa-calendar-alt"></i> Calendario</h1>
+            <p class="section-desc">Eventos y actividades del GC</p>
+          </div>
+          <button class="btn-primary" id="add-event-btn">
+            <i class="fas fa-plus"></i>
+            <span>Nuevo Evento</span>
+          </button>
+        </div>
+
+        <div class="calendar-layout">
+          <!-- Calendar grid -->
+          <div class="calendar-widget">
+            <div class="calendar-header-nav">
+              <button class="cal-nav-btn" id="cal-prev"><i class="fas fa-chevron-left"></i></button>
+              <h3 id="cal-month-year">Mayo 2026</h3>
+              <button class="cal-nav-btn" id="cal-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+          </div>
+
+          <!-- Events list -->
+          <div class="events-panel">
+            <h3 id="events-date-title">Eventos del día</h3>
+            <div id="events-list" class="events-list">
+              <div class="empty-state small" id="events-empty">
+                <i class="fas fa-calendar-day"></i>
+                <p>No hay eventos para este día</p>
+              </div>
+            </div>
+
+            <h3 class="mt-2">Próximos eventos</h3>
+            <div id="upcoming-events" class="events-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ ORGANIZACION GC ============ -->
+      <section id="section-organizacion" class="section" style="display:none;">
+        <div class="section-header">
+          <div>
+            <h1><i class="fas fa-clipboard-list"></i> Organización GC</h1>
+            <p class="section-desc">Planificá los roles de cada reunión</p>
+          </div>
+          <button class="btn-primary" id="add-gc-btn">
+            <i class="fas fa-plus"></i>
+            <span>Nueva Reunión</span>
+          </button>
+        </div>
+
+        <div class="gc-meetings-list" id="gc-meetings-list">
+          <div class="empty-state" id="gc-empty">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No hay reuniones organizadas</h3>
+            <p>Creá la primera planificación de reunión</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================== MODALS ===================== -->
+
+  <!-- Modal: Add/Edit Persona -->
+  <div class="modal-overlay" id="modal-persona" style="display:none;">
+    <div class="modal" id="modal-persona-content">
+      <div class="modal-header">
+        <h2 id="modal-persona-title"><i class="fas fa-user-plus"></i> Nueva Persona</h2>
+        <button class="modal-close" id="modal-persona-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="persona-form" class="modal-body">
+        <input type="hidden" id="persona-id" />
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="persona-nombre">Nombre completo</label>
+            <input type="text" id="persona-nombre" required placeholder="Nombre y apellido" />
+          </div>
+          <div class="form-group">
+            <label for="persona-edad">Edad</label>
+            <input type="number" id="persona-edad" min="0" max="120" placeholder="Edad" />
+          </div>
+          <div class="form-group">
+            <label for="persona-categoria">Categoría</label>
+            <select id="persona-categoria">
+              <option value="Jóvenes">Jóvenes</option>
+              <option value="Mujeres">Mujeres</option>
+              <option value="Adultos">Adultos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-primera-vez">¿Primera vez?</label>
+            <select id="persona-primera-vez">
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-veces">Veces que vino</label>
+            <input type="number" id="persona-veces" min="0" placeholder="Cantidad" />
+          </div>
+          <div class="form-group">
+            <label for="persona-contenida">¿Está contenida?</label>
+            <select id="persona-contenida">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-primera-visita">Primera visita</label>
+            <input type="date" id="persona-primera-visita" />
+          </div>
+          <div class="form-group">
+            <label for="persona-cumple">Cumpleaños</label>
+            <input type="date" id="persona-cumple" />
+          </div>
+          <div class="form-group">
+            <label for="persona-encuentro">Encuentro</label>
+            <select id="persona-encuentro">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-bautismo">Bautismo</label>
+            <select id="persona-bautismo">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-discipulado">Discipulado</label>
+            <select id="persona-discipulado">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="persona-escuela">Escuela de Líderes</label>
+            <select id="persona-escuela">
+              <option value="false">No</option>
+              <option value="true">Sí</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="modal-persona-cancel">Cancelar</button>
+          <button type="submit" class="btn-primary" id="persona-submit-btn">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Event -->
+  <div class="modal-overlay" id="modal-event" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-event-title"><i class="fas fa-calendar-plus"></i> Nuevo Evento</h2>
+        <button class="modal-close" id="modal-event-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="event-form" class="modal-body">
+        <input type="hidden" id="event-id" />
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="event-titulo">Título del evento</label>
+            <input type="text" id="event-titulo" required placeholder="Nombre del evento" />
+          </div>
+          <div class="form-group">
+            <label for="event-tipo">Tipo de evento</label>
+            <select id="event-tipo">
+              <option value="Evangelización">Evangelización</option>
+              <option value="Ágape">Ágape</option>
+              <option value="Caminata de Oración">Caminata de Oración</option>
+              <option value="Reunión GC">Reunión GC</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="event-fecha">Fecha</label>
+            <input type="date" id="event-fecha" required />
+          </div>
+          <div class="form-group">
+            <label for="event-hora">Hora</label>
+            <input type="time" id="event-hora" />
+          </div>
+          <div class="form-group">
+            <label for="event-lugar">Lugar</label>
+            <input type="text" id="event-lugar" placeholder="Ubicación" />
+          </div>
+          <div class="form-group full-width">
+            <label for="event-descripcion">Descripción</label>
+            <textarea id="event-descripcion" rows="3" placeholder="Detalles del evento..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="modal-event-cancel">Cancelar</button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit GC Meeting -->
+  <div class="modal-overlay" id="modal-gc" style="display:none;">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 id="modal-gc-title"><i class="fas fa-clipboard-list"></i> Nueva Reunión GC</h2>
+        <button class="modal-close" id="modal-gc-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="gc-form" class="modal-body">
+        <input type="hidden" id="gc-id" />
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="gc-fecha">Fecha de reunión</label>
+            <input type="date" id="gc-fecha" required />
+          </div>
+          <div class="form-group">
+            <label for="gc-tema">Tema de la Palabra</label>
+            <input type="text" id="gc-tema" placeholder="Tema o pasaje bíblico" />
+          </div>
+        </div>
+
+        <h3 class="form-section-title"><i class="fas fa-praying-hands"></i> Roles de la Reunión</h3>
+        <div class="form-grid roles-grid">
+          <div class="form-group">
+            <label for="gc-bienvenida">Da la Bienvenida</label>
+            <input type="text" id="gc-bienvenida" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-bienvenida">Ora por la Bienvenida</label>
+            <input type="text" id="gc-ora-bienvenida" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-sillas-vacias">Ora por Sillas Vacías</label>
+            <input type="text" id="gc-sillas-vacias" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-palabra">Da la Palabra</label>
+            <input type="text" id="gc-palabra" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-alabanza">Ora después de la Alabanza</label>
+            <input type="text" id="gc-ora-alabanza" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-palabra">Ora después de la Palabra</label>
+            <input type="text" id="gc-ora-palabra" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-misiones">Ora por Misiones</label>
+            <input type="text" id="gc-ora-misiones" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-ofrenda">Ora por Ofrenda</label>
+            <input type="text" id="gc-ora-ofrenda" placeholder="Nombre" />
+          </div>
+          <div class="form-group">
+            <label for="gc-ora-necesidades">Ora por Necesidades</label>
+            <input type="text" id="gc-ora-necesidades" placeholder="Nombre" />
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label for="gc-notas">Notas adicionales</label>
+          <textarea id="gc-notas" rows="2" placeholder="Notas..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="modal-gc-cancel">Cancelar</button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
