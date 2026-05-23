@@ -149,6 +149,26 @@ if (toggleLogin) {
   });
 }
 
+function translateAuthError(message) {
+  const msg = message.toLowerCase();
+  if (msg.includes('invalid login credentials')) {
+    return 'Correo o contraseña incorrectos. Por favor, verificá tus datos.';
+  }
+  if (msg.includes('email signup is disabled')) {
+    return 'El registro de nuevas cuentas está deshabilitado en este momento.';
+  }
+  if (msg.includes('user already exists') || msg.includes('already registered')) {
+    return 'Ya existe una cuenta registrada con este correo electrónico.';
+  }
+  if (msg.includes('should be at least 6 characters') || msg.includes('weak password')) {
+    return 'La contraseña debe tener al menos 6 caracteres.';
+  }
+  if (msg.includes('email confirmation') || msg.includes('confirm your email')) {
+    return 'Debés confirmar tu correo electrónico antes de ingresar. Revisá tu casilla de correo.';
+  }
+  return message;
+}
+
 // Auth Handlers
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -164,7 +184,7 @@ loginForm.addEventListener('submit', async (e) => {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    errorEl.innerText = error.message;
+    errorEl.innerText = translateAuthError(error.message);
     btn.disabled = false;
     btn.querySelector('span').innerText = 'Ingresar';
   } else {
@@ -188,11 +208,20 @@ signupForm.addEventListener('submit', async (e) => {
   const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    errorEl.innerText = error.message;
+    errorEl.innerText = translateAuthError(error.message);
     btn.disabled = false;
     btn.querySelector('span').innerText = 'Crear cuenta';
   } else {
-    showToast('Cuenta creada con éxito. Ya podés iniciar sesión.');
+    // Si la confirmación de email está activa en Supabase (por defecto lo está para nuevos proyectos),
+    // data.user existe pero data.session estará vacía. Le avisamos al usuario.
+    if (data.user && !data.session) {
+      showToast('Cuenta creada. Por favor, confirma tu correo electrónico si está habilitado en tu panel de Supabase.', 'warning');
+      errorEl.style.color = '#C3B299';
+      errorEl.innerText = 'Cuenta creada. Si no te deja ingresar directamente, verificá si te llegó un correo de confirmación de Supabase (o desactivá la confirmación de email en tu panel de Supabase -> Auth -> Providers -> Email).';
+    } else {
+      showToast('Cuenta creada con éxito. Ya podés iniciar sesión.');
+    }
+    
     signupForm.style.display = 'none';
     loginForm.style.display = 'block';
     document.getElementById('login-card').querySelector('h1').innerText = 'GC Buchardo';
