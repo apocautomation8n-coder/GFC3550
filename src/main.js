@@ -2,8 +2,8 @@ import './style.css';
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://plepqtlpcqijnnbreke.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZXBxdGxwcWNpanpuYmJyZWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0ODc0MDQsImV4cCI6MjA5NTA2MzQwNH0.vOAaOYq2qQegqC0cFFJNo2rZp2J5pG0zBuQ3wIUC6NM';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://plepqtlpqcijznbbreke.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_8FJuez_F2RT3p3rU20Bi4Q_mjkSGVmX';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
