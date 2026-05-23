@@ -421,6 +421,19 @@
             <label for="event-lugar">Lugar</label>
             <input type="text" id="event-lugar" placeholder="Ubicación" />
           </div>
+          <div class="form-group">
+            <label for="event-repeticion">Repetición</label>
+            <select id="event-repeticion">
+              <option value="none">No se repite</option>
+              <option value="1m">Cada 1 mes</option>
+              <option value="6w">Cada 1 mes y 2 semanas</option>
+              <option value="2m">Cada 2 meses</option>
+            </select>
+          </div>
+          <div class="form-group" id="event-repeticiones-group" style="display:none;">
+            <label for="event-repeticiones-cant">Veces a repetir</label>
+            <input type="number" id="event-repeticiones-cant" min="1" max="24" value="1" placeholder="Ej: 3" />
+          </div>
           <div class="form-group full-width">
             <label for="event-descripcion">Descripción</label>
             <textarea id="event-descripcion" rows="3" placeholder="Detalles del evento..."></textarea>

@@ -640,6 +640,47 @@ function renderUpcomingEvents() {
   });
 }
 
+// Event Modal Recurrence UI Toggle
+const eventRepeticionSelect = document.getElementById('event-repeticion');
+const eventRepeticionesGroup = document.getElementById('event-repeticiones-group');
+
+if (eventRepeticionSelect && eventRepeticionesGroup) {
+  eventRepeticionSelect.addEventListener('change', () => {
+    if (eventRepeticionSelect.value === 'none') {
+      eventRepeticionesGroup.style.display = 'none';
+      document.getElementById('event-repeticiones-cant').required = false;
+    } else {
+      eventRepeticionesGroup.style.display = 'flex';
+      document.getElementById('event-repeticiones-cant').required = true;
+    }
+  });
+}
+
+function calcularFechasRecurrentes(fechaInicial, tipo, cantidad) {
+  const fechas = [fechaInicial];
+  const dateParts = fechaInicial.split('-'); // [YYYY, MM, DD]
+  const year = parseInt(dateParts[0]);
+  const month = parseInt(dateParts[1]) - 1; // 0-indexed month
+  const day = parseInt(dateParts[2]);
+
+  for (let i = 1; i <= cantidad; i++) {
+    let d = new Date(year, month, day);
+    if (tipo === '1m') {
+      d.setMonth(month + i);
+    } else if (tipo === '2m') {
+      d.setMonth(month + (i * 2));
+    } else if (tipo === '6w') {
+      d.setDate(day + (i * 42)); // 42 days = 6 weeks (1 month and 2 weeks)
+    }
+
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    fechas.push(`${yyyy}-${mm}-${dd}`);
+  }
+  return fechas;
+}
+
 // Event Modal Functions
 const eventModal = document.getElementById('modal-event');
 const eventForm = document.getElementById('event-form');
@@ -652,6 +693,7 @@ function openEventModal() {
   eventForm.reset();
   document.getElementById('event-id').value = '';
   document.getElementById('event-fecha').value = getFormattedToday();
+  if (eventRepeticionesGroup) eventRepeticionesGroup.style.display = 'none';
   eventModal.style.display = 'flex';
 }
 
@@ -662,23 +704,55 @@ function closeEventModal() {
 eventForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const data = {
-    titulo: document.getElementById('event-titulo').value,
-    tipo: document.getElementById('event-tipo').value,
-    fecha: document.getElementById('event-fecha').value,
-    hora: document.getElementById('event-hora').value || null,
-    lugar: document.getElementById('event-lugar').value,
-    descripcion: document.getElementById('event-descripcion').value,
-    user_id: currentUser.id
-  };
+  const titulo = document.getElementById('event-titulo').value;
+  const tipo = document.getElementById('event-tipo').value;
+  const fechaOriginal = document.getElementById('event-fecha').value;
+  const hora = document.getElementById('event-hora').value || null;
+  const lugar = document.getElementById('event-lugar').value;
+  const descripcion = document.getElementById('event-descripcion').value;
+  
+  const repeticion = document.getElementById('event-repeticion').value;
+  const repeticionesCant = parseInt(document.getElementById('event-repeticiones-cant').value) || 1;
 
-  const res = await supabase.from('eventos').insert([data]);
+  let eventosAInsertar = [];
+
+  if (repeticion === 'none') {
+    eventosAInsertar.push({
+      titulo,
+      tipo,
+      fecha: fechaOriginal,
+      hora,
+      lugar,
+      descripcion,
+      user_id: currentUser.id
+    });
+  } else {
+    // Calcular fechas recurrentes
+    const fechas = calcularFechasRecurrentes(fechaOriginal, repeticion, repeticionesCant);
+    fechas.forEach((f, index) => {
+      eventosAInsertar.push({
+        titulo: index === 0 ? titulo : `${titulo} (Repetición ${index})`,
+        tipo,
+        fecha: f,
+        hora,
+        lugar,
+        descripcion,
+        user_id: currentUser.id
+      });
+    });
+  }
+
+  const res = await supabase.from('eventos').insert(eventosAInsertar);
 
   if (res.error) {
-    showToast('Error al guardar evento.', 'error');
+    showToast('Error al guardar evento(s).', 'error');
     console.error(res.error);
   } else {
-    showToast('Evento creado.');
+    if (repeticion === 'none') {
+      showToast('Evento creado.');
+    } else {
+      showToast(`Se crearon ${eventosAInsertar.length} eventos recurrentes.`);
+    }
     closeEventModal();
     loadData();
   }
