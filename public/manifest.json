@@ -1,7 +1,7 @@
 {
   "name": "GC 3550",
   "short_name": "GC 3550",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0A0908",
   "theme_color": "#0A0908",
