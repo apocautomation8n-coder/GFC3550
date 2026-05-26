@@ -3,10 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>GC 3550 — Grupo de Crecimiento</title>
   <meta name="description"
-    content="Sistema de gestión para el Grupo de Crecimiento en Buchardo 2010. Administra personas, eventos y organización del GC." />
+    content="GC 3550 — Sistema de gestión para el Grupo de Crecimiento. Administra personas, eventos y organización del GC." />
+  <meta name="theme-color" content="#0A0908" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -25,7 +26,7 @@
         <div class="logo-icon">
           <i class="fas fa-cross"></i>
         </div>
-        <h1>GC Buchardo</h1>
+        <h1>GC 3550</h1>
         <p class="login-subtitle">Grupo de Crecimiento</p>
       </div>
       <form id="login-form" autocomplete="off">
@@ -74,7 +75,7 @@
   <!-- ===================== APP ===================== -->
   <div id="app" class="app" style="display:none;">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (Desktop) -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
@@ -82,12 +83,12 @@
             <i class="fas fa-cross"></i>
           </div>
           <div>
-            <h2>GC Buchardo</h2>
+            <h2>GC 3550</h2>
             <span class="sidebar-tagline">Grupo de Crecimiento</span>
           </div>
         </div>
-        <button class="sidebar-toggle-btn" id="sidebar-toggle">
-          <i class="fas fa-bars"></i>
+        <button class="sidebar-close-btn" id="sidebar-close">
+          <i class="fas fa-times"></i>
         </button>
       </div>
       <nav class="sidebar-nav">
@@ -118,13 +119,16 @@
       </div>
     </aside>
 
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <!-- Mobile header -->
     <header class="mobile-header" id="mobile-header">
-      <button class="mobile-menu-btn" id="mobile-menu-btn">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">
         <i class="fas fa-bars"></i>
       </button>
-      <h2>GC Buchardo</h2>
-      <button class="btn-logout-mobile" id="logout-btn-mobile">
+      <h2>GC 3550</h2>
+      <button class="btn-logout-mobile" id="logout-btn-mobile" aria-label="Cerrar sesión">
         <i class="fas fa-sign-out-alt"></i>
       </button>
     </header>
@@ -139,7 +143,7 @@
             <h1><i class="fas fa-users"></i> Personas</h1>
             <p class="section-desc">Registro de asistentes al Grupo de Crecimiento</p>
           </div>
-          <button class="btn-primary" id="add-persona-btn">
+          <button class="btn-primary btn-add" id="add-persona-btn">
             <i class="fas fa-plus"></i>
             <span>Nueva Persona</span>
           </button>
@@ -193,7 +197,7 @@
           </div>
         </div>
 
-        <!-- Table -->
+        <!-- Table (desktop) -->
         <div class="table-container">
           <table class="data-table" id="personas-table">
             <thead>
@@ -222,6 +226,9 @@
             <p>Agregá la primera persona al grupo de crecimiento</p>
           </div>
         </div>
+
+        <!-- Mobile cards (hidden on desktop) -->
+        <div class="persona-cards-mobile" id="persona-cards-mobile"></div>
       </section>
 
       <!-- ============ CALENDARIO ============ -->
@@ -231,7 +238,7 @@
             <h1><i class="fas fa-calendar-alt"></i> Calendario</h1>
             <p class="section-desc">Eventos y actividades del GC</p>
           </div>
-          <button class="btn-primary" id="add-event-btn">
+          <button class="btn-primary btn-add" id="add-event-btn">
             <i class="fas fa-plus"></i>
             <span>Nuevo Evento</span>
           </button>
@@ -241,14 +248,15 @@
           <!-- Calendar grid -->
           <div class="calendar-widget">
             <div class="calendar-header-nav">
-              <button class="cal-nav-btn" id="cal-prev"><i class="fas fa-chevron-left"></i></button>
+              <button class="cal-nav-btn" id="cal-prev" aria-label="Mes anterior"><i class="fas fa-chevron-left"></i></button>
               <h3 id="cal-month-year">Mayo 2026</h3>
-              <button class="cal-nav-btn" id="cal-next"><i class="fas fa-chevron-right"></i></button>
+              <button class="cal-nav-btn" id="cal-next" aria-label="Mes siguiente"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="calendar-weekdays">
               <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
             </div>
             <div class="calendar-grid" id="calendar-grid"></div>
+            <p class="drag-hint" id="drag-hint"><i class="fas fa-hand-pointer"></i> Arrastrá un evento para moverlo de fecha</p>
           </div>
 
           <!-- Events list -->
@@ -274,7 +282,7 @@
             <h1><i class="fas fa-clipboard-list"></i> Organización GC</h1>
             <p class="section-desc">Planificá los roles de cada reunión</p>
           </div>
-          <button class="btn-primary" id="add-gc-btn">
+          <button class="btn-primary btn-add" id="add-gc-btn">
             <i class="fas fa-plus"></i>
             <span>Nueva Reunión</span>
           </button>
@@ -290,6 +298,22 @@
       </section>
 
     </main>
+
+    <!-- Mobile bottom nav -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+      <button class="bottom-nav-item active" data-section="personas" id="bnav-personas">
+        <i class="fas fa-users"></i>
+        <span>Personas</span>
+      </button>
+      <button class="bottom-nav-item" data-section="calendario" id="bnav-calendario">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Calendario</span>
+      </button>
+      <button class="bottom-nav-item" data-section="organizacion" id="bnav-organizacion">
+        <i class="fas fa-clipboard-list"></i>
+        <span>Organización</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ===================== MODALS ===================== -->

@@ -105,13 +105,13 @@ function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   let icon = '<i class="fas fa-check-circle"></i>';
   if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
-  
+
   toast.innerHTML = `${icon} <span>${message}</span>`;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.remove();
   }, 3000);
@@ -176,7 +176,7 @@ loginForm.addEventListener('submit', async (e) => {
   const password = document.getElementById('login-password').value;
   const btn = document.getElementById('login-btn');
   const errorEl = document.getElementById('login-error');
-  
+
   btn.disabled = true;
   btn.querySelector('span').innerText = 'Ingresando...';
   errorEl.innerText = '';
@@ -200,7 +200,7 @@ signupForm.addEventListener('submit', async (e) => {
   const password = document.getElementById('signup-password').value;
   const btn = document.getElementById('signup-btn');
   const errorEl = document.getElementById('signup-error');
-  
+
   btn.disabled = true;
   btn.querySelector('span').innerText = 'Creando cuenta...';
   errorEl.innerText = '';
@@ -221,7 +221,7 @@ signupForm.addEventListener('submit', async (e) => {
     } else {
       showToast('Cuenta creada con éxito. Ya podés iniciar sesión.');
     }
-    
+
     signupForm.style.display = 'none';
     loginForm.style.display = 'block';
     document.getElementById('login-card').querySelector('h1').innerText = 'GC Buchardo';
@@ -261,7 +261,7 @@ async function setupApp() {
   loginScreen.style.display = 'none';
   appScreen.style.display = 'flex';
   userEmailDisplay.innerText = currentUser.email;
-  
+
   // Try to load initial data
   await loadData();
 }
@@ -310,23 +310,52 @@ function renderAll() {
 
 // Navigation logic
 function setupAppNavigation() {
-  const navItems = document.querySelectorAll('.nav-item');
+  const navItems = document.querySelectorAll('.nav-item, .bottom-nav-item');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const sidebarClose = document.getElementById('sidebar-close');
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    });
+  }
+
+  if (sidebarClose) {
+    sidebarClose.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    });
+  }
+
+  // Update mobile toggle
+  if (mobileMenuBtn) {
+    mobileMenuBtn.replaceWith(mobileMenuBtn.cloneNode(true));
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+    });
+  }
+
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const targetSection = item.getAttribute('data-section');
+
+      document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
       
-      navItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      
+      // Activate matching items in both navs
+      document.querySelectorAll(`[data-section="${targetSection}"]`).forEach(i => i.classList.add('active'));
+
       document.querySelectorAll('.section').forEach(sec => {
         sec.classList.remove('active');
       });
       document.getElementById(`section-${targetSection}`).classList.add('active');
-      
+
       activeSection = targetSection;
       if (window.innerWidth <= 768) {
         sidebar.classList.remove('active');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('active');
       }
     });
   });
@@ -361,6 +390,9 @@ function renderPersonas() {
   }
   empty.style.display = 'none';
 
+  const mobileContainer = document.getElementById('persona-cards-mobile');
+  if (mobileContainer) mobileContainer.innerHTML = '';
+
   filtered.forEach(p => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -384,7 +416,36 @@ function renderPersonas() {
       </td>
     `;
     tbody.appendChild(tr);
+
+    // Mobile card
+    if (mobileContainer) {
+      const card = document.createElement('div');
+      card.className = 'persona-card';
+      card.innerHTML = `
+        <h4>${escapeHtml(p.nombre)}</h4>
+        <p><i class="fas fa-tag"></i> ${p.categoria || '-'}</p>
+        <p><i class="fas fa-calendar"></i> Visitas: ${p.veces || 0}</p>
+        <div>
+          ${p.primera_vez ? '<span class="badge badge-yes">1ra Vez</span>' : ''}
+          ${p.contenida ? '<span class="badge badge-yes">Contenida</span>' : ''}
+        </div>
+        <div class="action-btns">
+          <button class="btn-icon edit-persona" data-id="${p.id}"><i class="fas fa-edit"></i></button>
+          <button class="btn-icon delete delete-persona" data-id="${p.id}"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      `;
+      mobileContainer.appendChild(card);
+    }
   });
+
+  if (mobileContainer) {
+    mobileContainer.querySelectorAll('.edit-persona').forEach(btn => {
+      btn.addEventListener('click', () => openPersonaModal(btn.getAttribute('data-id')));
+    });
+    mobileContainer.querySelectorAll('.delete-persona').forEach(btn => {
+      btn.addEventListener('click', () => deletePersona(btn.getAttribute('data-id')));
+    });
+  }
 
   // Attach table event actions
   tbody.querySelectorAll('.edit-persona').forEach(btn => {
@@ -411,7 +472,7 @@ function openPersonaModal(id = null) {
   personaForm.reset();
   document.getElementById('persona-id').value = '';
   document.getElementById('modal-persona-title').innerHTML = '<i class="fas fa-user-plus"></i> Nueva Persona';
-  
+
   if (id) {
     const p = personas.find(item => item.id === id);
     if (p) {
@@ -428,7 +489,7 @@ function openPersonaModal(id = null) {
       document.getElementById('persona-bautismo').value = String(p.bautismo);
       document.getElementById('persona-discipulado').value = String(p.discipulado);
       document.getElementById('persona-escuela').value = String(p.escuela);
-      
+
       document.getElementById('modal-persona-title').innerHTML = '<i class="fas fa-user-edit"></i> Editar Persona';
     }
   }
@@ -441,7 +502,7 @@ function closePersonaModal() {
 
 personaForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const id = document.getElementById('persona-id').value;
   const data = {
     nombre: document.getElementById('persona-nombre').value,
@@ -501,7 +562,7 @@ function renderCalendar() {
 
   const year = selectedDate.getFullYear();
   const month = selectedDate.getMonth();
-  
+
   monthYearLabel.innerText = `${monthNames[month]} ${year}`;
 
   const firstDayIndex = new Date(year, month, 1).getDay();
@@ -518,28 +579,55 @@ function renderCalendar() {
   for (let i = 1; i <= lastDay; i++) {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'calendar-day';
-    dayDiv.innerText = i;
 
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-    
-    // Check if there are events on this day
-    const hasEvents = eventos.some(e => e.fecha === dateStr);
-    if (hasEvents) {
-      const dot = document.createElement('span');
-      dot.className = 'event-dot';
-      dayDiv.appendChild(dot);
+    dayDiv.dataset.date = dateStr;
+
+    // Day number label
+    const dayNum = document.createElement('span');
+    dayNum.className = 'day-number';
+    dayNum.innerText = i;
+    dayDiv.appendChild(dayNum);
+
+    // Event dots container
+    const dayEvents = eventos.filter(e => e.fecha === dateStr);
+    if (dayEvents.length > 0) {
+      const dotsRow = document.createElement('div');
+      dotsRow.className = 'day-dots-row';
+      const maxDots = Math.min(dayEvents.length, 3);
+      for (let d = 0; d < maxDots; d++) {
+        const dot = document.createElement('span');
+        dot.className = 'event-dot';
+        dotsRow.appendChild(dot);
+      }
+      dayDiv.appendChild(dotsRow);
     }
 
-    // Is it selected?
+    // Mark today
     const todayStr = getFormattedToday();
-    if (dateStr === todayStr) {
-      dayDiv.classList.add('today');
-    }
+    if (dateStr === todayStr) dayDiv.classList.add('today');
 
+    // Click to select day
     dayDiv.addEventListener('click', () => {
       document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
       dayDiv.classList.add('selected');
       renderEventsForDate(dateStr);
+    });
+
+    // ---- DRAG & DROP (Desktop) ----
+    dayDiv.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dayDiv.classList.add('drag-over');
+    });
+    dayDiv.addEventListener('dragleave', () => {
+      dayDiv.classList.remove('drag-over');
+    });
+    dayDiv.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dayDiv.classList.remove('drag-over');
+      const eventId = e.dataTransfer.getData('text/plain');
+      if (!eventId) return;
+      await rescheduleEvent(eventId, dateStr);
     });
 
     grid.appendChild(dayDiv);
@@ -548,6 +636,55 @@ function renderCalendar() {
   // Initial event load for today
   renderEventsForDate(getFormattedToday());
   renderUpcomingEvents();
+
+  // ---- SWIPE (Mobile) ----
+  setupCalendarSwipe(grid);
+}
+
+// Reschedule event to a new date
+async function rescheduleEvent(eventId, newDate) {
+  const evento = eventos.find(e => e.id === eventId);
+  if (!evento) return;
+
+  const { error } = await supabase
+    .from('eventos')
+    .update({ fecha: newDate })
+    .eq('id', eventId);
+
+  if (error) {
+    showToast('Error al mover el evento.', 'error');
+    console.error(error);
+  } else {
+    showToast(`Evento movido al ${formatDate(newDate)}.`);
+    loadData();
+  }
+}
+
+// Touch swipe to navigate months
+let touchStartX = 0;
+let touchStartY = 0;
+function setupCalendarSwipe(element) {
+  element.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  element.addEventListener('touchend', (e) => {
+    const deltaX = e.changedTouches[0].screenX - touchStartX;
+    const deltaY = e.changedTouches[0].screenY - touchStartY;
+
+    // Only trigger if mostly horizontal swipe (not a scroll)
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+      if (deltaX < 0) {
+        // Swipe left → next month
+        selectedDate.setMonth(selectedDate.getMonth() + 1);
+      } else {
+        // Swipe right → prev month
+        selectedDate.setMonth(selectedDate.getMonth() - 1);
+      }
+      renderCalendar();
+    }
+  }, { passive: true });
 }
 
 function getFormattedToday() {
@@ -570,7 +707,7 @@ function renderEventsForDate(dateStr) {
   const list = document.getElementById('events-list');
   const title = document.getElementById('events-date-title');
   list.innerHTML = '';
-  
+
   const parsedDate = new Date(dateStr + 'T00:00:00');
   title.innerText = `Eventos del ${parsedDate.getDate()} de ${monthNames[parsedDate.getMonth()]}`;
 
@@ -589,6 +726,10 @@ function renderEventsForDate(dateStr) {
   dayEvents.forEach(e => {
     const card = document.createElement('div');
     card.className = 'event-card';
+    card.draggable = true;
+    card.addEventListener('dragstart', (ev) => {
+      ev.dataTransfer.setData('text/plain', e.id);
+    });
     card.innerHTML = `
       <div class="event-card-content">
         <h4>${escapeHtml(e.titulo)}</h4>
@@ -614,7 +755,7 @@ function renderEventsForDate(dateStr) {
 function renderUpcomingEvents() {
   const panel = document.getElementById('upcoming-events');
   panel.innerHTML = '';
-  
+
   const todayStr = getFormattedToday();
   const upcoming = eventos.filter(e => e.fecha >= todayStr).slice(0, 5);
 
@@ -703,14 +844,14 @@ function closeEventModal() {
 
 eventForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
   const titulo = document.getElementById('event-titulo').value;
   const tipo = document.getElementById('event-tipo').value;
   const fechaOriginal = document.getElementById('event-fecha').value;
   const hora = document.getElementById('event-hora').value || null;
   const lugar = document.getElementById('event-lugar').value;
   const descripcion = document.getElementById('event-descripcion').value;
-  
+
   const repeticion = document.getElementById('event-repeticion').value;
   const repeticionesCant = parseInt(document.getElementById('event-repeticiones-cant').value) || 1;
 
@@ -777,7 +918,7 @@ async function deleteEvent(id) {
 function renderReuniones() {
   const container = document.getElementById('gc-meetings-list');
   const empty = document.getElementById('gc-empty');
-  
+
   // Clear non-empty states
   const cards = container.querySelectorAll('.meeting-card');
   cards.forEach(c => c.remove());
